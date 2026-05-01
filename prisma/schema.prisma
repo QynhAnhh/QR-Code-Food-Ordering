@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------
+// 1. ENUMS (Các hằng số cố định)
+// ------------------------------------------------------
+
+// Phân quyền 3 vai trò theo yêu cầu
+enum Role {
+  MANAGER   // Quản lý tổng
+  CASHIER   // Thu ngân (xử lý thanh toán)
+  KITCHEN   // Bếp (chỉ nhận đơn và báo xong)
+}
+
+// Luồng đi của một đơn hàng
+enum OrderStatus {
+  PENDING   // Chờ xử lý (Khách vừa quét mã gọi món)
+  COOKING   // Đang nấu (Bếp đã nhận đơn)
+  READY     // Đã xong (Chờ mang ra bàn/chờ thanh toán)
+  COMPLETED // Đã thanh toán (Hoàn tất)
+}
+
+// ------------------------------------------------------
+// 2. MODELS (Các bảng dữ liệu)
+// ------------------------------------------------------
+
+model User {
+  id            Int      @id @default(autoincrement())
+  username      String   @unique
+  password_hash String
+  role          Role     @default(CASHIER)
+  full_name     String
+  
+  orders        Order[]  @relation("UserToOrder")
+}
+
+model Table {
+  id          Int      @id @default(autoincrement())
+  name        String
+  qr_code     String   @unique
+  status      String   @default("EMPTY")
+  
+  orders      Order[]
+}
+
+model Category {
+  id         Int        @id @default(autoincrement())
+  name       String
+  
+  menu_items MenuItem[]
+}
+
+model MenuItem {
+  id           Int         @id @default(autoincrement())
+  category_id  Int
+  name         String
+  price        Decimal     @db.Decimal(10, 2)
+  image_url    String?
+  is_available Boolean     @default(true)
+  
+  category     Category    @relation(fields: [category_id], references: [id])
+  order_items  OrderItem[]
+}
+
+model Order {
+  id           Int         @id @default(autoincrement())
+  table_id     Int
+  user_id      Int?        // ID của CASHIER khi chốt thanh toán
+  total_amount Decimal     @db.Decimal(10, 2) @default(0.00)
+  status       OrderStatus @default(PENDING)
+  created_at   DateTime    @default(now())
+  
+  table        Table       @relation(fields: [table_id], references: [id])
+  user         User?       @relation("UserToOrder", fields: [user_id], references: [id])
+  
+  order_items  OrderItem[]
+}
+
+model OrderItem {
+  id             Int       @id @default(autoincrement())
+  order_id       Int
+  menu_item_id   Int
+  quantity       Int
+  price_at_order Decimal   @db.Decimal(10, 2)
+  note           String?
+  
+  // onDelete: Cascade giúp tự động xóa OrderItem nếu Order bị xóa
+  order          Order     @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  menu_item      MenuItem  @relation(fields: [menu_item_id], references: [id])
+}
