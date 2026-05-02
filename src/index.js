@@ -14,6 +14,12 @@ app.get("/", (req, res) => {
   res.send("Server Hệ thống gọi món qua QR đang hoạt động.");
 });
 
+// Khai báo file routes của khách hàng
+const customerRoutes = require("./routes/customerRoutes");
+
+// Mọi API bắt đầu bằng /api/customer sẽ được giao cho customerRoutes xử lý
+app.use("/api/customer", customerRoutes);
+
 // Chạy server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
