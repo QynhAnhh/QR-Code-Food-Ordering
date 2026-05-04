@@ -3,8 +3,8 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
-const http = require('http');
-const { Server } = require('socket.io');
+const http = require("http");
+const { Server } = require("socket.io");
 
 const app = express();
 
@@ -12,7 +12,7 @@ const server = http.createServer(app);
 
 // 3. Khởi tạo Socket.io
 const io = new Server(server, {
-  cors: { origin: '*' } // Cho phép mọi Frontend kết nối đến
+  cors: { origin: "*" }, // Cho phép mọi Frontend kết nối đến
 });
 
 // Middleware cơ bản
@@ -26,21 +26,21 @@ app.use((req, res, next) => {
 });
 
 // 5. Cấu hình các phòng (Rooms) cho Socket.io
-io.on('connection', (socket) => {
-  console.log('🟢 Có thiết bị kết nối Socket:', socket.id);
-// Khi nhân viên đăng nhập trên Frontend, Frontend sẽ gửi tín hiệu 'join-room'
-  socket.on('join-room', (role) => {
-    if (role === 'KITCHEN') {
-      socket.join('kitchen-room');
+io.on("connection", (socket) => {
+  console.log("🟢 Có thiết bị kết nối Socket:", socket.id);
+  // Khi nhân viên đăng nhập trên Frontend, Frontend sẽ gửi tín hiệu 'join-room'
+  socket.on("join-room", (role) => {
+    if (role === "KITCHEN") {
+      socket.join("kitchen-room");
       console.log(`👨‍🍳 Thiết bị ${socket.id} đã vào phòng BẾP`);
-    } else if (role === 'CASHIER') {
-      socket.join('cashier-room');
+    } else if (role === "CASHIER") {
+      socket.join("cashier-room");
       console.log(`👩‍💻 Thiết bị ${socket.id} đã vào phòng THU NGÂN`);
     }
   });
 
-  socket.on('disconnect', () => {
-    console.log('🔴 Thiết bị ngắt kết nối:', socket.id);
+  socket.on("disconnect", () => {
+    console.log("🔴 Thiết bị ngắt kết nối:", socket.id);
   });
 });
 // API test thử xem server sống chưa
@@ -68,6 +68,6 @@ app.use("/api/auth", authRoutes);
 
 // Chạy server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);
 });
