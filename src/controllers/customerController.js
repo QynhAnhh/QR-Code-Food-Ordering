@@ -53,6 +53,9 @@ const createOrder = async (req, res) => {
       },
     });
 
+// Phát tín hiệu 'new-order' đến thẳng phòng 'kitchen-room'
+req.io.to('kitchen-room').emit('new-order', newOrder);
+
     res.status(201).json({ message: "Đặt món thành công!", order: newOrder });
   } catch (error) {
     console.error("Lỗi khi đặt món:", error);

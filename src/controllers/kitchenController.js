@@ -19,8 +19,9 @@ const updateOrderStatus = async (req, res) => {
       include: { order_items: true }, // Trả về luôn thông tin các món trong đơn
     });
 
-    // TODO: Sau này học Socket.io, chúng ta sẽ thêm lệnh bắn thông báo ở đây
-
+    if (status === "READY") {
+      req.io.to("cashier-room").emit("order-ready", updatedOrder);
+    }
     res.status(200).json({
       message: `Đơn hàng #${id} đã chuyển sang trạng thái: ${status}`,
       order: updatedOrder,
